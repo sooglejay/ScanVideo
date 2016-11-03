@@ -60,7 +60,7 @@ public class SuperVideoPlayer extends RelativeLayout {
     private MediaController.PageType mCurrPageType = MediaController.PageType.SHRINK;//当前是横屏还是竖屏
 
 
-    private Animation showAnimation,hideAnimation;
+    private Animation showAnimation, hideAnimation;
 
     private Context mContext;
     private SuperVideoView mSuperVideoView;
@@ -115,12 +115,13 @@ public class SuperVideoPlayer extends RelativeLayout {
         @Override
         public void onClick(View view) {
             if (view.getId() == R.id.video_close_view) {
-                if(mCurrPageType==MediaController.PageType.EXPAND){
-                    mMediaControl.onPageTurn();
-                }
-                else {
-                    mVideoPlayCallback.onCloseVideo();
-                }
+                //下面屏蔽的代码，是之前  找不到缩小屏幕的方法，就用关闭按钮替代了，现在不需要了
+//                if(mCurrPageType==MediaController.PageType.EXPAND){
+//                    mMediaControl.onPageTurn();
+//                }
+//                else {
+                mVideoPlayCallback.onCloseVideo();
+//                }
             } else if (view.getId() == R.id.video_share_tv_view) {
                 shareToTv();
             } else if (view.getId() == R.id.txt_dlna_exit) {
@@ -303,11 +304,10 @@ public class SuperVideoPlayer extends RelativeLayout {
     }
 
     /***
-     *
      * @param allVideo     所有的视频
      * @param selectVideo  指定的视频
      * @param selectFormat 指定的格式
-     * @param seekTime 开始进度
+     * @param seekTime     开始进度
      */
     public void loadMultipleVideo(ArrayList<Video> allVideo, int selectVideo, int selectFormat, int seekTime) {
         if (null == allVideo || allVideo.size() == 0) {
@@ -425,11 +425,8 @@ public class SuperVideoPlayer extends RelativeLayout {
         });
 
 
-         hideAnimation = AnimationUtils.loadAnimation(mContext,
+        hideAnimation = AnimationUtils.loadAnimation(mContext,
                 R.anim.anim_enter_from_bottom);
-
-
-
 
 
     }
@@ -715,4 +712,14 @@ public class SuperVideoPlayer extends RelativeLayout {
         void onPlayFinish();
     }
 
+    public ExpandAndShrinkCallBack expandAndShrinkCallBack;
+
+    public void setExpandAndShrinkCallBack(ExpandAndShrinkCallBack expandAndShrinkCallBack) {
+        this.expandAndShrinkCallBack = expandAndShrinkCallBack;
+        mMediaController.setExpandAndShrinkCallBack(this.expandAndShrinkCallBack);
+    }
+
+    public interface ExpandAndShrinkCallBack extends MediaController.ExpandAndShrinkCallBack {
+
+    }
 }

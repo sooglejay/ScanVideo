@@ -26,6 +26,7 @@ import com.android.tedcoder.wkvideoplayer.view.MediaController;
 import com.android.tedcoder.wkvideoplayer.view.SuperVideoPlayer;
 import com.example.sooglejay.scannews.R;
 import com.example.sooglejay.scannews.constant.Constant;
+import com.example.sooglejay.scannews.util.PicShrink;
 import com.qq.wx.img.imgsearcher.ImgListener;
 import com.qq.wx.img.imgsearcher.ImgResult;
 import com.qq.wx.img.imgsearcher.ImgSearcher;
@@ -37,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class VideoTestActivity extends Activity implements View.OnClickListener,SurfaceHolder.Callback ,Camera.PreviewCallback ,ImgListener {
+public class VideoTestActivity extends Activity implements View.OnClickListener, SurfaceHolder.Callback, Camera.PreviewCallback, ImgListener {
 
     Camera camera;
     SurfaceView mPreView;
@@ -51,8 +52,8 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
 
     private FrameLayout layout;
 
-//    private String mp4Online = "http://video.jiecao.fm/8/17/%E6%8A%AB%E8%90%A8.mp4";
-    private String mp4Local = "android.resource://com.example.sooglejay.scannews/"+R.raw.v;
+    private String mp4Online = "https://pan.baidu.com/play/video#video/path=%2Fv.mp4&t=-1";
+    private String mp4Local = "android.resource://com.example.sooglejay.scannews/" + R.raw.v;
     private SuperVideoPlayer.VideoPlayCallbackImpl mVideoPlayCallback = new SuperVideoPlayer.VideoPlayCallbackImpl() {
         @Override
         public void onCloseVideo() {
@@ -60,6 +61,9 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
             mPlayBtnView.setVisibility(View.VISIBLE);
             mSuperVideoPlayer.setVisibility(View.GONE);
             resetPageToPortrait();
+
+            mSuperVideoPlayer.pausePlay(false);
+            layout.setVisibility(View.GONE);
         }
 
         @Override
@@ -81,6 +85,12 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void onClick(View view) {
+        prepareVideo1();
+
+    }
+
+
+    private void prepareVideo1() {
         mPlayBtnView.setVisibility(View.GONE);
         mSuperVideoPlayer.setVisibility(View.VISIBLE);
         mSuperVideoPlayer.setAutoHideController(false);
@@ -103,9 +113,10 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
         video.setVideoUrl(arrayList1);
         ArrayList<Video> videoArrayList = new ArrayList<>();
         videoArrayList.add(video);
-        mSuperVideoPlayer.loadMultipleVideo(videoArrayList,0,0,0);
+        mSuperVideoPlayer.loadMultipleVideo(videoArrayList, 0, 0, 0);
 
     }
+
 
     @Override
     protected void onPause() {
@@ -127,10 +138,10 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
                 /* 停止预览 */
                 camera.stopPreview();
                 camera.release();
-                camera=null;
+                camera = null;
             } catch (Exception e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 System.gc();
             }
         }
@@ -170,19 +181,27 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        Toast.makeText(VideoTestActivity.this, "进入回调  ！", Toast.LENGTH_SHORT).show();
+
         if (null == mSuperVideoPlayer) return;
+        Toast.makeText(VideoTestActivity.this, "离开回调  ！", Toast.LENGTH_SHORT).show();
+
         /***
          * 根据屏幕方向重新设置播放器的大小
          */
         if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().getDecorView().invalidate();
+
             float height = DensityUtil.getWidthInPx(this);
             float width = DensityUtil.getHeightInPx(this);
-            mSuperVideoPlayer.getLayoutParams().height = (int) width-100;
+            mSuperVideoPlayer.getLayoutParams().height = (int) width - 100;
             mSuperVideoPlayer.getLayoutParams().width = (int) height;
+
         } else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Toast.makeText(VideoTestActivity.this, "portait  ！", Toast.LENGTH_SHORT).show();
             final WindowManager.LayoutParams attrs = getWindow().getAttributes();
             attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().setAttributes(attrs);
@@ -200,7 +219,7 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.video_test_layout);
 
-        layout = (FrameLayout)findViewById(R.id.layout);
+        layout = (FrameLayout) findViewById(R.id.layout);
         mPreView = (SurfaceView) findViewById(R.id.mSurfaceView);
         mPreView.getHolder().addCallback(this);
         mPreView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -210,14 +229,25 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
         mPlayBtnView = findViewById(R.id.play_btn);
         mPlayBtnView.setOnClickListener(this);
         mSuperVideoPlayer.setVideoPlayCallback(mVideoPlayCallback);
+        mSuperVideoPlayer.setExpandAndShrinkCallBack(new SuperVideoPlayer.ExpandAndShrinkCallBack() {
+
+            @Override
+            public void toExpand() {
+//                Toast.makeText(VideoTestActivity.this,"放大",Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void toShrink() {
+//                Toast.makeText(VideoTestActivity.this,"suoxiao ",Toast.LENGTH_LONG).show();
+//
+            }
+        });
         startDLNAService();
         //开始播放
         mPlayBtnView.performClick();
 
         preInitImg();
     }
-
-
 
 
     private void preInitImg() {
@@ -229,6 +259,7 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
                     Toast.LENGTH_SHORT).show();
         }
     }
+
     private int startImgSearching(byte[] img) {
         if (mInitSucc != 0) {
             mInitSucc = ImgSearcher.shareInstance().init(this, Constant.AppSecret);
@@ -242,8 +273,7 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
         int ret = ImgSearcher.shareInstance().start(img, Constant.IMG);
         if (0 == ret) {
             return 0;
-        }
-        else {
+        } else {
             Toast.makeText(this, "ErrorCode = " + ret, Toast.LENGTH_LONG).show();
             return -1;
         }
@@ -318,7 +348,9 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
-//        startImgSearching(bytes);
+
+        //开始图像处理和识别
+        startImgSearching(PicShrink.compressBytes(bytes));
     }
 
     @Override
@@ -336,9 +368,14 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
                 }
             }
         }
-        if(!TextUtils.isEmpty(mResMD5)){
-//            mSuperVideoPlayer.goOnPlay();
+        if (!TextUtils.isEmpty(mResMD5)) {
+            layout.setVisibility(View.VISIBLE);
+            mSuperVideoPlayer.goOnPlay();
+        } else {
+            mSuperVideoPlayer.pausePlay(true);
+            layout.setVisibility(View.GONE);
         }
+        mResMD5 = "";
     }
 
     @Override
@@ -357,13 +394,15 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
 
         @Override
         public void onAutoFocus(boolean b, Camera camera) {
-            Log.e("jwjw","come.....");
-            if (b){
+            Log.e("jwjw", "come.....");
+            if (b) {
                 camera.setOneShotPreviewCallback(VideoTestActivity.this);
-            }else{
-                Log.e("jwjw","none");
+            } else {
+                Log.e("jwjw", "none");
             }
         }
-    };
+    }
+
+    ;
 
 }

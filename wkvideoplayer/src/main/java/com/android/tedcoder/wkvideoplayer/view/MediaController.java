@@ -82,8 +82,14 @@ public class MediaController extends FrameLayout implements SeekBar.OnSeekBarCha
         if (view.getId() == R.id.pause) {
             mMediaControl.onPlayTurn();
         } else if (view.getId() == R.id.expand) {
+            if (expandAndShrinkCallBack != null) {
+                expandAndShrinkCallBack.toExpand();
+            }
             mMediaControl.onPageTurn();
         } else if (view.getId() == R.id.shrink) {
+            if (expandAndShrinkCallBack != null) {
+                expandAndShrinkCallBack.toShrink();
+            }
             mMediaControl.onPageTurn();
         }
     }
@@ -122,7 +128,7 @@ public class MediaController extends FrameLayout implements SeekBar.OnSeekBarCha
     /***
      * 强制横屏模式
      */
-    public void forceLandscapeMode(){
+    public void forceLandscapeMode() {
         mExpandImg.setVisibility(INVISIBLE);
         mShrinkImg.setVisibility(INVISIBLE);
     }
@@ -249,6 +255,18 @@ public class MediaController extends FrameLayout implements SeekBar.OnSeekBarCha
         void onSelectFormat(int position);
 
         void alwaysShowController();
+    }
+
+    public ExpandAndShrinkCallBack expandAndShrinkCallBack;
+
+    public void setExpandAndShrinkCallBack(ExpandAndShrinkCallBack expandAndShrinkCallBack) {
+        this.expandAndShrinkCallBack = expandAndShrinkCallBack;
+    }
+
+    public interface ExpandAndShrinkCallBack {
+        void toExpand();
+
+        void toShrink();
     }
 
 }
