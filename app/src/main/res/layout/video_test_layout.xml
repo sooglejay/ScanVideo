@@ -9,15 +9,15 @@
 
     <SurfaceView
         android:id="@+id/mSurfaceView"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
         android:layout_weight="1" />
 
     <FrameLayout
-        android:layout_width="match_parent"
+        android:id="@+id/layout"
+        android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_gravity="center">
+        android:layout_weight="1">
 
         <ImageView
             android:id="@+id/play_btn"
@@ -30,7 +30,7 @@
             android:id="@+id/video_player_item_1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"></com.android.tedcoder.wkvideoplayer.view.SuperVideoPlayer>
+            android:visibility="gone" />
 
     </FrameLayout>
 

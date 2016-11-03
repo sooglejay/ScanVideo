@@ -14,6 +14,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.android.tedcoder.wkvideoplayer.dlna.engine.DLNAContainer;
@@ -47,6 +48,8 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
 
     private int mInitSucc;
     private String mResMD5;
+
+    private FrameLayout layout;
 
 //    private String mp4Online = "http://video.jiecao.fm/8/17/%E6%8A%AB%E8%90%A8.mp4";
     private String mp4Local = "android.resource://com.example.sooglejay.scannews/"+R.raw.v;
@@ -197,6 +200,7 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.video_test_layout);
 
+        layout = (FrameLayout)findViewById(R.id.layout);
         mPreView = (SurfaceView) findViewById(R.id.mSurfaceView);
         mPreView.getHolder().addCallback(this);
         mPreView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -209,6 +213,8 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
         startDLNAService();
         //开始播放
         mPlayBtnView.performClick();
+
+        preInitImg();
     }
 
 
@@ -312,7 +318,7 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
-
+//        startImgSearching(bytes);
     }
 
     @Override
