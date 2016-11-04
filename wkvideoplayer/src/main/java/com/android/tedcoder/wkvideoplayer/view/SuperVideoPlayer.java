@@ -52,6 +52,7 @@ import java.util.TimerTask;
  * SuperVideoPlayer
  */
 public class SuperVideoPlayer extends RelativeLayout {
+    public static boolean isClosed = true;
 
     private final int MSG_HIDE_CONTROLLER = 10;
     private final int MSG_UPDATE_PLAY_TIME = 11;
@@ -354,6 +355,7 @@ public class SuperVideoPlayer extends RelativeLayout {
         mSuperVideoView.pause();
         mSuperVideoView.stopPlayback();
         mSuperVideoView.setVisibility(GONE);
+        isClosed = true;
     }
 
     /***

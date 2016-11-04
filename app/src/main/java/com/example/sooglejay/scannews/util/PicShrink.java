@@ -1,13 +1,20 @@
 package com.example.sooglejay.scannews.util;
 
 import android.content.Context;
+import android.database.SQLException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.net.Uri;
+import android.util.Base64;
 import android.util.Log;
+
+import com.example.sooglejay.scannews.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.sql.Blob;
 
 public class PicShrink {
     private final static String TAG = "PicShrink";
@@ -139,27 +146,64 @@ public class PicShrink {
 
 
     public static byte[] compressBytes(byte[] img) {
-
-
-        Bitmap bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
-        bitmap = getResizedBitmap(bitmap,680);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();//初始化一个流对象
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, output);//把bitmap100%高质量压缩 到 output对象里
-        byte[] result = output.toByteArray();//转换成功了
+        Bitmap bitmap = null;
+        Bitmap resizedBitmap = null;
+        byte[] result = img;
         try {
+            bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
+            Log.e("jwjw", "BitmapFactory.decodeByteArray(img, 0, img.length) suucess! w=" + bitmap.getWidth() + " h=" + bitmap.getHeight());
+        } catch (Exception e) {
+            Log.e("jwjw", " BitmapFactory.decodeByteArray(img, 0, img.length)  :" + e.toString());
+            e.printStackTrace();
+            return img;
+        }
+        try {
+            resizedBitmap = getResizedBitmap(bitmap, 680);
+            Log.e("jwjw", "getResizedBitmap(bitmap, 480) suucess! w=" + resizedBitmap.getWidth() + " h=" + resizedBitmap.getHeight());
+            ByteArrayOutputStream output = new ByteArrayOutputStream();//初始化一个流对象
+            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, output);//把bitmap100%高质量压缩 到 output对象里
+            result = output.toByteArray();//转换成功了
             output.close();
         } catch (Exception e) {
+            Log.e("jwjw", " other:" + e.toString());
             e.printStackTrace();
         } finally {
+            if (resizedBitmap != null) resizedBitmap.recycle();//自由选择是否进行回收
             bitmap.recycle();//自由选择是否进行回收
-            return result;
         }
+        return result;
+    }
 
-
+    /***
+     * bitmap to string
+     *
+     * @param image
+     * @return
+     */
+    public static String encodeTobase64(Bitmap image) {
+        Bitmap immagex = image;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        immagex.compress(Bitmap.CompressFormat.PNG, 90, baos);
+        byte[] b = baos.toByteArray();
+        String imageEncoded = Base64.encodeToString(b, Base64.DEFAULT);
+        return imageEncoded;
     }
 
     /**
+     * string to bitmap
+     *
+     * @param input
+     * @return
+     */
+    public static Bitmap decodeBase64(String input) {
+        byte[] decodedByte = Base64.decode(input, 0);
+        return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
+    }
+
+
+    /**
      * reduces the size of the image
+     *
      * @param image
      * @param maxSize
      * @return
@@ -168,7 +212,7 @@ public class PicShrink {
         int width = image.getWidth();
         int height = image.getHeight();
 
-        float bitmapRatio = (float)width / (float) height;
+        float bitmapRatio = (float) width / (float) height;
         if (bitmapRatio > 0) {
             width = maxSize;
             height = (int) (width / bitmapRatio);

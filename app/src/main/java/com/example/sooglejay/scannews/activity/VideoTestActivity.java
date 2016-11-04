@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +34,7 @@ import com.qq.wx.img.imgsearcher.ImgResult;
 import com.qq.wx.img.imgsearcher.ImgSearcher;
 import com.qq.wx.img.imgsearcher.ImgSearcherState;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -51,6 +54,8 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
     private String mResMD5;
 
     private FrameLayout layout;
+
+    private int tI = 0;
 
     private String mp4Online = "https://pan.baidu.com/play/video#video/path=%2Fv.mp4&t=-1";
     private String mp4Local = "android.resource://com.example.sooglejay.scannews/" + R.raw.v;
@@ -85,15 +90,17 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void onClick(View view) {
-        prepareVideo1();
-
+        prepareLocalVideo();
+        pause();
     }
 
 
-    private void prepareVideo1() {
+    private void prepareLocalVideo() {
         mPlayBtnView.setVisibility(View.GONE);
+        layout.setVisibility(View.VISIBLE);
         mSuperVideoPlayer.setVisibility(View.VISIBLE);
         mSuperVideoPlayer.setAutoHideController(false);
+
 
         Video video = new Video();
         VideoUrl videoUrl1 = new VideoUrl();
@@ -109,12 +116,31 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
         ArrayList<VideoUrl> arrayList1 = new ArrayList<>();
         arrayList1.add(videoUrl1);
         arrayList1.add(videoUrl2);
-        video.setVideoName("测试视频一");
+        video.setVideoName("本地视频");
         video.setVideoUrl(arrayList1);
         ArrayList<Video> videoArrayList = new ArrayList<>();
         videoArrayList.add(video);
         mSuperVideoPlayer.loadMultipleVideo(videoArrayList, 0, 0, 0);
+    }
 
+    public void prepareOnline(){
+        mPlayBtnView.setVisibility(View.GONE);
+        layout.setVisibility(View.VISIBLE);
+        mSuperVideoPlayer.setVisibility(View.VISIBLE);
+        mSuperVideoPlayer.setAutoHideController(false);
+
+        Video video = new Video();
+        VideoUrl videoUrl1 = new VideoUrl();
+        videoUrl1.setFormatName("720P");
+        videoUrl1.setFormatUrl(mp4Online);
+        videoUrl1.setIsOnlineVideo(true);
+        ArrayList<VideoUrl> arrayList1 = new ArrayList<>();
+        arrayList1.add(videoUrl1);
+        video.setVideoName("在线视频");
+        video.setVideoUrl(arrayList1);
+        ArrayList<Video> videoArrayList = new ArrayList<>();
+        videoArrayList.add(video);
+        mSuperVideoPlayer.loadMultipleVideo(videoArrayList, 0, 0, 0);
     }
 
 
@@ -245,7 +271,6 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
         startDLNAService();
         //开始播放
         mPlayBtnView.performClick();
-
         preInitImg();
     }
 
@@ -348,10 +373,21 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
-
         //开始图像处理和识别
-        startImgSearching(PicShrink.compressBytes(bytes));
+        Camera.Parameters parameters = camera.getParameters();
+        int width = parameters.getPreviewSize().width;
+        int height = parameters.getPreviewSize().height;
+        YuvImage yuv = new YuvImage(bytes, parameters.getPreviewFormat(), width, height, null);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        yuv.compressToJpeg(new Rect(0, 0, width, height), 80, out);
+        byte[] bytesFinal = out.toByteArray();
+        Log.e("jwjw", "preview");
+        if (bytesFinal != null && bytesFinal.length > 0) {
+            //开始图像处理和识别
+            startImgSearching(PicShrink.compressBytes(bytesFinal));
+        }
     }
+
 
     @Override
     public void onGetResult(ImgResult imgResult) {
@@ -378,12 +414,33 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
         mResMD5 = "";
     }
 
+
+    public void pause(){
+        mSuperVideoPlayer.pausePlay(false);
+        layout.setVisibility(View.GONE);
+    }
+
     @Override
     public void onGetError(int i) {
         Toast.makeText(this, "ErrorCode = " + i, Toast.LENGTH_LONG).show();
-
+        if(i==104){
+            if(tI!=104){
+                tI=104;
+                prepareLocalVideo();
+            }else if(SuperVideoPlayer.isClosed){
+                SuperVideoPlayer.isClosed = false;
+                prepareLocalVideo();
+            }
+        }else if (i==114){
+            if(tI!=114){
+                tI=114;
+                prepareOnline();
+            }else if(SuperVideoPlayer.isClosed){
+                SuperVideoPlayer.isClosed = false;
+                prepareOnline();
+            }
+        }
     }
-
     @Override
     public void onGetState(ImgSearcherState imgSearcherState) {
 
@@ -402,7 +459,5 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
             }
         }
     }
-
-    ;
 
 }
