@@ -404,14 +404,14 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
                 }
             }
         }
-        if (!TextUtils.isEmpty(mResMD5)) {
-            layout.setVisibility(View.VISIBLE);
-            mSuperVideoPlayer.goOnPlay();
-        } else {
-            mSuperVideoPlayer.pausePlay(true);
-            layout.setVisibility(View.GONE);
-        }
-        mResMD5 = "";
+//        if (!TextUtils.isEmpty(mResMD5)) {
+//            layout.setVisibility(View.VISIBLE);
+//            mSuperVideoPlayer.goOnPlay();
+//        } else {
+//            mSuperVideoPlayer.pausePlay(true);
+//            layout.setVisibility(View.GONE);
+//        }
+//        mResMD5 = "";
     }
 
 
