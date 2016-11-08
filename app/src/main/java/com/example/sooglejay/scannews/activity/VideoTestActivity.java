@@ -271,6 +271,8 @@ public class VideoTestActivity extends Activity implements View.OnClickListener,
         startDLNAService();
         //开始播放
         mPlayBtnView.performClick();
+
+
         preInitImg();
     }
 
